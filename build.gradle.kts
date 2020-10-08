@@ -22,3 +22,7 @@ configure<JavaPluginConvention> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.withType<JavaExec> {
+    environment("SERVER_URL", "http://localhost:5678")
+}
