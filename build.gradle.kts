@@ -1,5 +1,6 @@
 plugins {
     java
+    application
 }
 
 repositories {
@@ -8,6 +9,14 @@ repositories {
 
 dependencies {
     testImplementation("org.junit.jupiter", "junit-jupiter", "5.7.0")
+}
+
+configure<ApplicationPluginConvention> {
+    mainClassName = "com.example.Main"
+}
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 tasks.withType<Test> {
