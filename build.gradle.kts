@@ -4,20 +4,11 @@ import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 import com.bmuschko.gradle.docker.tasks.container.extras.DockerLivenessContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
     application
     id("com.bmuschko.docker-remote-api") version "6.6.1"
-}
-
-repositories {
-    jcenter()
-}
-
-dependencies {
-    testImplementation("org.junit.jupiter", "junit-jupiter", "5.7.0")
 }
 
 configure<ApplicationPluginConvention> {
@@ -28,7 +19,7 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val serverPort = 5678
+val containerHostPort = properties.getOrDefault("server.port", 5678)
 
 val pullDockerImage by tasks.creating(DockerPullImage::class) {
     image.set("hashicorp/http-echo:latest")
@@ -37,7 +28,7 @@ val pullDockerImage by tasks.creating(DockerPullImage::class) {
 val createContainer by tasks.creating(DockerCreateContainer::class) {
     dependsOn(pullDockerImage)
     targetImageId(pullDockerImage.image.get())
-    hostConfig.portBindings.add("$serverPort:5678")
+    hostConfig.portBindings.add("$containerHostPort:5678")
     cmd.set(listOf("-text", "Hello world!"))
 }
 
@@ -66,16 +57,5 @@ tasks.withType<JavaExec> {
     dependsOn(waitContainer)
     finalizedBy(removeContainer)
 
-    environment("SERVER_URL", "http://localhost:$serverPort")
-}
-
-tasks.withType<Test> {
-    dependsOn(waitContainer)
-    finalizedBy(removeContainer)
-    environment("SERVER_URL", "http://localhost:$serverPort")
-
-    useJUnitPlatform()
-    testLogging {
-        events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED)
-    }
+    environment("SERVER_URL", "http://localhost:$containerHostPort")
 }
