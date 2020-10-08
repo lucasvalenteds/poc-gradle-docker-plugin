@@ -9,7 +9,7 @@ import java.net.http.HttpResponse;
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        String serverUrl = System.getenv("SERVER_URL");
+        String serverUrl = "http://localhost:" + System.getenv("PORT");
         HttpResponse<String> response = HttpClient.newHttpClient().send(
             HttpRequest.newBuilder().uri(URI.create(serverUrl)).GET().build(),
             HttpResponse.BodyHandlers.ofString()
