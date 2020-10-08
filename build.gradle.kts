@@ -4,6 +4,7 @@ import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer
 import com.bmuschko.gradle.docker.tasks.container.extras.DockerLivenessContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerPullImage
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     java
@@ -67,6 +68,9 @@ tasks.withType<Test> {
     environment("SERVER_URL", "http://localhost:$serverPort")
 
     useJUnitPlatform()
+    testLogging {
+        events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED)
+    }
 }
 
 tasks.withType<JavaExec> {

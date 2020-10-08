@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTest {
 
     @Test
-    void test() throws IOException, InterruptedException {
+    void testReturningHelloWorldAndStatusOk() throws IOException, InterruptedException {
         HttpResponse<String> response = HttpClient.newHttpClient()
             .send(
                 HttpRequest.newBuilder().uri(URI.create(System.getenv("SERVER_URL"))).GET().build(),
