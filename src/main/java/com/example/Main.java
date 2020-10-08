@@ -9,12 +9,15 @@ import java.net.http.HttpResponse;
 public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        HttpResponse<String> response = HttpClient.newHttpClient()
-            .send(
-                HttpRequest.newBuilder().uri(URI.create(System.getenv("SERVER_URL"))).GET().build(),
-                HttpResponse.BodyHandlers.ofString()
-            );
+        HttpResponse<String> response = HttpClient.newHttpClient().send(
+            HttpRequest.newBuilder().uri(URI.create(System.getenv("SERVER_URL"))).GET().build(),
+            HttpResponse.BodyHandlers.ofString()
+        );
 
-        System.out.println(response.body());
+        assert response.statusCode() == 200;
+        assert response.body().trim().equals("Hello world!");
+
+        System.out.println("Status code: " + response.statusCode());
+        System.out.println("Response body: " + response.body().trim());
     }
 }
