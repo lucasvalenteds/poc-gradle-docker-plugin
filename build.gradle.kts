@@ -57,5 +57,5 @@ tasks.withType<JavaExec> {
     dependsOn(waitContainer)
     finalizedBy(removeContainer)
 
-    environment("SERVER_URL", "http://localhost:$containerHostPort")
+    environment.putIfAbsent("SERVER_URL", "http://localhost:$containerHostPort")
 }
