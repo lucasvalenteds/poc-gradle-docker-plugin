@@ -19,7 +19,7 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val containerHostPort = properties.getOrDefault("port", 8080)
+val containerHostPort = System.getenv("PORT") ?: properties["port"] ?: "8080"
 
 val pullDockerImage by tasks.registering(DockerPullImage::class) {
     image.set("hashicorp/http-echo:latest")
@@ -54,9 +54,7 @@ val removeContainer by tasks.registering(DockerRemoveContainer::class) {
 }
 
 tasks.withType<JavaExec>().configureEach {
-    if ("PORT" !in environment.keys) {
-        dependsOn(waitContainer)
-        finalizedBy(removeContainer)
-        environment("PORT", "$containerHostPort")
-    }
+    dependsOn(waitContainer)
+    finalizedBy(removeContainer)
+    environment.putIfAbsent("PORT", containerHostPort)
 }
