@@ -21,41 +21,42 @@ configure<JavaPluginConvention> {
 
 val containerHostPort = properties.getOrDefault("port", 8080)
 
-val pullDockerImage by tasks.creating(DockerPullImage::class) {
+val pullDockerImage by tasks.registering(DockerPullImage::class) {
     image.set("hashicorp/http-echo:latest")
 }
 
-val createContainer by tasks.creating(DockerCreateContainer::class) {
+val createContainer by tasks.registering(DockerCreateContainer::class) {
     dependsOn(pullDockerImage)
-    targetImageId(pullDockerImage.image.get())
+    targetImageId(pullDockerImage.get().image)
     hostConfig.portBindings.add("$containerHostPort:5678")
     cmd.set(listOf("-text", "Hello world!"))
 }
 
-val startContainer by tasks.creating(DockerStartContainer::class) {
+val startContainer by tasks.registering(DockerStartContainer::class) {
     dependsOn(createContainer)
-    targetContainerId(createContainer.containerId)
+    targetContainerId(createContainer.get().containerId)
 }
 
-val waitContainer by tasks.creating(DockerLivenessContainer::class.java) {
+val waitContainer by tasks.registering(DockerLivenessContainer::class) {
     dependsOn(startContainer)
-    targetContainerId(createContainer.containerId)
+    targetContainerId(createContainer.get().containerId)
     livenessProbe("Server is listening")
 }
 
-val stopContainer by tasks.creating(DockerStopContainer::class) {
+val stopContainer by tasks.registering(DockerStopContainer::class) {
     dependsOn(waitContainer)
-    targetContainerId(createContainer.containerId)
+    targetContainerId(createContainer.get().containerId)
 }
 
-val removeContainer by tasks.creating(DockerRemoveContainer::class) {
+val removeContainer by tasks.registering(DockerRemoveContainer::class) {
     dependsOn(stopContainer)
-    targetContainerId(createContainer.containerId)
+    targetContainerId(createContainer.get().containerId)
 }
 
-tasks.withType<JavaExec> {
-    dependsOn(waitContainer)
-    finalizedBy(removeContainer)
-
-    environment.putIfAbsent("PORT", containerHostPort)
+tasks.withType<JavaExec>().configureEach {
+    if ("PORT" !in environment.keys) {
+        dependsOn(waitContainer)
+        finalizedBy(removeContainer)
+        environment("PORT", "$containerHostPort")
+    }
 }
