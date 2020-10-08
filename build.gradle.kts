@@ -62,6 +62,13 @@ val removeContainer by tasks.creating(DockerRemoveContainer::class) {
     targetContainerId(createContainer.containerId)
 }
 
+tasks.withType<JavaExec> {
+    dependsOn(waitContainer)
+    finalizedBy(removeContainer)
+
+    environment("SERVER_URL", "http://localhost:$serverPort")
+}
+
 tasks.withType<Test> {
     dependsOn(waitContainer)
     finalizedBy(removeContainer)
@@ -71,11 +78,4 @@ tasks.withType<Test> {
     testLogging {
         events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED)
     }
-}
-
-tasks.withType<JavaExec> {
-    dependsOn(waitContainer)
-    finalizedBy(removeContainer)
-
-    environment("SERVER_URL", "http://localhost:$serverPort")
 }
