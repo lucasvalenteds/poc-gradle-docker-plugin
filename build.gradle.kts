@@ -19,7 +19,7 @@ configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val containerHostPort = properties.getOrDefault("server.port", 5678)
+val containerHostPort = properties.getOrDefault("server.port", 8080)
 
 val pullDockerImage by tasks.creating(DockerPullImage::class) {
     image.set("hashicorp/http-echo:latest")
